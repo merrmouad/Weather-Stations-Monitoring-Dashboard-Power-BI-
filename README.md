@@ -1,208 +1,88 @@
-# Weather Stations Monitoring Dashboard (Power BI)
-
-## Project Overview
-
-This project is a **Power BI dashboard** designed to monitor and analyze the activity of weather stations worldwide.
-
-The goal is to provide clear insights into:
-
-* Station activity (reporting vs non-reporting)
-* Data transmission performance
-* Geographic distribution of stations
-* Monthly evolution of station activity (focus on France)
-
-This project follows **best practices in data modeling**, including a **Star Schema architecture** for performance and scalability.
-
----
-
-## Key Features
-
-* KPI indicators:
-
-  * Total number of stations
-  * Stations reporting data
-  * Stations not reporting data
-  * Data received / transmitted
-
-* Interactive map:
-
-  * Visualization of stations by geographic location (latitude/longitude)
-  * Filtering by country
-
-* Monthly analysis:
-
-  * Evolution of reporting vs non-reporting stations
- 
-
-* Dynamic filters:
-
-  * Country
-  * Station name
-  * Data type (Daily / Monthly)
-  * Date
-
----
-
-## Data Model (Star Schema)
-
-The project is built using a **Star Schema**, ensuring high performance and clear relationships.
-
-### Fact Table
-
-#### `FactMeteo`
-
-Contains all measured data:
-
-* Date
-* Station ID (`wigosid`)
-* Country code (ISO3)
-* Parameter (temperature, pressure, etc.)
-* Value
-* Type (Daily / Monthly)
-* Received 
-* Expected 
-* Station name
-* Longitude
-* Latitude   
-...
-
-
----
-
-### Dimension Tables
-
-#### `DimPays`
-
-* Code country (ISO3)
-* Country name
-
-#### `DimDate`
-
-* Date
-
-#### `DimParametre`
-
-* Weather parameters (temperature, pressure, etc.)
-
-#### `DimType`
-
-* Data type (Daily / Monthly)
-
-#### `DimStation`
-
-* Station ID (`wigosid`)
-* Station name
-* Country (ISO3)
-* Latitude
-* Longitude
-
----
-
-### Schema Overview
-
-* Fact table at the center
-* Dimensions used for filtering and slicing
-* One-to-many relationships (* → 1)
-
----
-
-## Data Preparation
-
-Data transformation was performed using **Power Query**:
-
-* Unpivoting wide tables into a normalized format
-* Merging multiple datasets (daily & monthly)
-* Adding calculated columns:
-
-  * Parameter
-  * Type (Daily / Monthly)
-* Cleaning and validating geographic coordinates
-
----
-
-## DAX Measures
-
-Key measures include:
-
-* Total stations:
-
-```DAX
-NbStations = COUNTROWS(DimStation)
-```
-
-* Reporting stations:
-
-```DAX
-Stations_Reporting =
-CALCULATE(
-    DISTINCTCOUNT(FactMeteo[wigosid]),
-    FactMeteo[received] <> 0
-)
-```
-
-* Non-reporting stations:
-
-```DAX
-Stations_Not_Reporting =
-CALCULATE(
-    DISTINCTCOUNT(FactMeteo[wigosid]),
-    FactMeteo[received] = 0
-)
-```
----
-
-## Monthly Analysis (France)
-
-A dedicated table (`France_Mensuel_Stations`) was created using simulated data to analyze:
-
-* Monthly variation of station activity
-* Fixed total of 175 stations
-* Example:
-
-  * March 2026 → 175 reporting / 0 non-reporting
-
----
-
-## Dashboard Design
-
-The dashboard follows a **modern SaaS-style design**:
-
-* Clean layout with KPI cards
-* Consistent color palette
-* Responsive layout with clear hierarchy
-
----
-
-## Technologies Used
-
-* Power BI Desktop
-* Power Query (ETL)
-* DAX (Data Analysis Expressions)
-
----
-
-## Future Improvements
-
-* Integration of real-time data
-* Advanced anomaly detection
-* Performance optimization with larger datasets
-* Deployment via Power BI Service
-
----
-
-## Author
-
-Developed as part of a **data engineering / data analytics portfolio project**.
-
----
-
-## Key Takeaway
-
-This project demonstrates:
-
-* Data modeling using Star Schema
-* Data transformation with Power Query
-* Analytical reporting with Power BI
-* Dashboard design best practices
-
----
+# Suivi de l’échange international des données météorologiques
+
+Le suivi de l’échange des données d’observation météorologique à l’échelle
+mondiale constitue une priorité pour l’Organisation météorologique mondiale (OMM).
+En effet, plus d’un million d’observations dites « de base » circulent quotidiennement
+au sein de la communauté météorologique et scientifique internationale. Ces
+échanges contribuent de manière significative à l’amélioration des modèles de
+prévision numérique du temps ainsi qu’à la qualité des services météorologiques et
+climatiques fournis, tant au bénéfice des populations qu’au profit de nombreux
+secteurs socioéconomiques tels que le transport aéronautique et maritime, le BTP, le
+tourisme, l’agriculture ou encore la pêche.
+Dans ce contexte, l’OMM a mis en place le Système mondial intégré des
+systèmes d’observation (WIGOS), qui constitue un cadre international pour la
+standardisation, l’intégration et l’exploitation des observations relatives au temps, au
+climat et à l’eau. Par ailleurs, elle met à la disposition de la communauté
+internationale des outils dédiés à la collecte, au suivi et à la gestion des données et
+métadonnées d’observation.
+
+Le tableau de bord que j’ai développé, en s’appuyant sur les informations publiées
+sur le site de l’OMM (www.wdqms.wmo.int) ainsi que sur les API associées, permet
+aux décideurs de l’OMM, au personnel des centres régionaux WIGOS et aux
+Services météorologiques et hydrologiques nationaux de disposer d’un suivi
+quotidien du volume d’observations échangées aux échelles mondiale, régionale et
+nationale, voire locale.
+
+Ce tableau de bord fournit notamment des indicateurs clés tels que le nombre de
+stations contribuant aux échanges de données, le volume quotidien ou mensuel des
+observations par variable, par pays et par station, ainsi que l’identification des
+stations rencontrant des difficultés dans la transmission de leurs données. Grâce à
+un suivi de l’évolution de ces indicateurs sur une période annuelle, l’outil permet
+d’évaluer les efforts nationaux visant à surmonter ces difficultés et à accroître leur
+contribution à l’amélioration des services de prévision et des systèmes d’alerte
+précoce, au bénéfice des citoyens du monde et des différents secteurs
+socioéconomiques.
+
+# Tracking Global Meteorological Observations under WIGOS
+
+Monitoring the exchange of meteorological observation data at the global level is a
+priority for the World Meteorological Organization (WMO). Indeed, more than one
+million socalled “basic” observations circulate daily within the global meteorological
+and scientific community. These exchanges contribute significantly to improve the
+reliability of numerical weather prediction models and to enhance the quality of the
+services provided, both for populations and for various socioeconomic sectors such
+as global air and maritime transport, construction and public works, tourism,
+agriculture, and fisheries.
+
+In this context, the WMO has established the WMO Integrated Global Observing
+System (WIGOS), which provides a global framework for the standardization,
+integration and interoperability of weather, climate and water observations. Within
+the same framework, the WMO has made available to the international community a
+set of tools dedicated to the collection, monitoring and management of observation
+data and metadata.
+
+The dashboard I developed, based on information published on the WMO website
+(www.wdqms.wmo.int) and the associated APIs, enables WMO decision makers,
+staff of the WMO WIGOS Regional Centers, and National Meteorological and
+Hydrological Services (NMHS) to access a daily monitoring system of the number of
+observations exchanged at global, regional and national, and even local, scales.
+The dashboard provides key indicators such as the number of stations contributing
+to data exchange, the daily or monthly volume of observations by variable, by
+country and by station, as well as the identification of stations experiencing
+difficulties in transmitting their data. By tracking the evolution of these indicators over
+the course of a year, the dashboard makes it possible to assess national efforts to
+overcome these challenges and to increase their contributions to the improvement of
+forecasting services and early warning systems, for the benefit of citizens worldwide
+and of various socioeconomic sectors.
+
+# Version courte
+Monitoring the global exchange of meteorological observation data is a priority for
+the World Meteorological Organization (WMO). Every day, more than one million
+basic observations are exchanged within the global meteorological and scientific
+community, contributing significantly to the improvement of numerical weather
+prediction models and to the delivery of highquality services for populations and key
+socioeconomic sectors such as aviation, maritime transport, agriculture and tourism.
+
+To support this effort, the WMO established the WMO Integrated Global Observing
+System (WIGOS), which provides a standardized framework for the integration and
+use of weather, climate and water observations, along with tools for managing
+observation data and metadata.
+
+The dashboard I developed, using data published on the WMO WDQMS website
+and its associated APIs, provides decision makers at the WMO, WIGOS Regional
+Centers and National Meteorological and Hydrological Services with a daily overview
+of observations exchanged at global, regional and national levels. It highlights key
+indicators such as contributing stations, observation volumes by variable and
+country, and stations experiencing data transmission issues. By tracking these
+indicators over time, the dashboard helps assess national efforts to improve data
+exchange and strengthen forecasting and early warning services worldwide.
